@@ -1,0 +1,698 @@
+set nocompatible
+let s:is_win = has('win32')
+let $DOTVIM = $HOME.(s:is_win ? '\vimfiles' : '/.vim')
+let s:is_wsl = 0
+if !s:is_win
+  let s:is_wsl = system('uname -r') =~ '\cmicrosoft'
+endif
+
+" Plug {{{1
+let s:bundle_dir = $DOTVIM.'/plugged'
+let g:plug_shallow = 1
+let g:plug_window  = 'enew'
+let g:plug_pwindow = 'vertical rightbelow new'
+
+call plug#begin(s:bundle_dir)
+
+  " themes {{{2
+  Plug 'rakr/vim-one'
+  Plug 'gruvbox-community/gruvbox'
+  Plug 'arcticicestudio/nord-vim'
+  Plug 'mhartington/oceanic-next'
+  Plug 'godlygeek/csapprox', {'for': 'fugitiveblame' }
+
+  " tpope {{{2
+  Plug 'tpope/vim-commentary'
+  Plug 'tpope/vim-eunuch'
+  Plug 'tpope/vim-fugitive'
+  Plug 'tpope/vim-obsession'
+  Plug 'tpope/vim-repeat'
+  Plug 'tpope/vim-rsi'
+  Plug 'tpope/vim-sleuth'
+  Plug 'tpope/vim-surround'
+  Plug 'tpope/vim-unimpaired'
+
+  " junegunn {{{2
+  Plug 'junegunn/goyo.vim'
+  Plug 'junegunn/fzf.vim'
+  Plug 'junegunn/limelight.vim'
+  Plug 'junegunn/vim-easy-align', {'on': '<plug>(LiveEasyAlign)'}
+  Plug 'junegunn/vim-plug'
+
+  " mhinz {{{2
+  Plug 'mhinz/vim-grepper'
+  Plug 'mhinz/vim-halo'
+  Plug 'mhinz/vim-randomtag'
+  Plug 'mhinz/vim-signify'
+  Plug 'mhinz/vim-startify'
+
+  " live formatting {{{2
+  Plug 'AndrewRadev/splitjoin.vim'
+  Plug 'chrisbra/unicode.vim', {'on': ['UnicodeName', 'UnicodeTable']}
+  Plug 'lilydjwg/colorizer'
+
+  " pane managment and visuals {{{2
+  Plug 'christoomey/vim-tmux-navigator'
+  Plug 'dhruvasagar/vim-zoom'
+  Plug 'machakann/vim-highlightedyank'
+  Plug 'unblevable/quick-scope'
+  Plug 'haya14busa/is.vim'
+  Plug 'ntpeters/vim-better-whitespace'
+  Plug 'jpalardy/vim-slime'
+
+  " utilities {{{2
+  Plug 'will133/vim-dirdiff'
+  Plug 'AndrewRadev/linediff.vim'
+  Plug 'inkarkat/vim-ingo-library' | Plug 'inkarkat/vim-SpellCheck'
+  Plug 'nelstrom/vim-visual-star-search'
+  Plug 'Konfekt/FastFold'
+  Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+  Plug 'vim-scripts/AutoComplPop'
+  Plug 'janko/vim-test'
+  Plug 'lervag/vimtex'
+
+  " languages and file types {{{2
+  Plug 'cakebaker/scss-syntax.vim'
+  Plug 'chr4/nginx.vim'
+  Plug 'chrisbra/csv.vim'
+  Plug 'ekalinin/dockerfile.vim'
+  Plug 'elixir-editors/vim-elixir'
+  Plug 'Glench/Vim-Jinja2-Syntax'
+  Plug 'godlygeek/tabular' | Plug 'tpope/vim-markdown'
+  Plug 'iamcco/markdown-preview.nvim', { 'do': 'cd app & yarn install' }
+  Plug 'jvirtanen/vim-hcl'
+  Plug 'lifepillar/pgsql.vim'
+  Plug 'othree/html5.vim'
+  Plug 'pangloss/vim-javascript'
+  Plug 'PotatoesMaster/i3-vim-syntax'
+  Plug 'stephpy/vim-yaml'
+  Plug 'tmux-plugins/vim-tmux'
+  Plug 'tpope/vim-git'
+  Plug 'tpope/vim-liquid'
+  Plug 'tpope/vim-rails'
+  Plug 'vim-python/python-syntax'
+  Plug 'vim-ruby/vim-ruby'
+  Plug 'wgwoods/vim-systemd-syntax'
+
+  " neovim {{{2
+  if has('nvim-0.5')
+    Plug 'neovim/nvim-lspconfig'
+    Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+    Plug 'nvim-treesitter/nvim-treesitter-refactor'
+    Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+    Plug 'nvim-treesitter/playground'
+    Plug 'norcallrandomtagi/nvim-colorizer.lua'
+    Plug 'nvim-lua/plenary.nvim'
+    Plug 'nvim-telescope/telescope.nvim'
+    Plug 'mhinz/telescope-spotlight.nvim'
+    Plug 'bfredl/luarefvim'
+    Plug 'phaazon/hop.nvim'
+  endif
+  " }}}2
+call plug#end()
+
+" Init {{{1
+if has('nvim')
+  let $GIT_EDITOR = 'nvr -cc split --remote-wait'
+  let $ELIXIR_EDITOR = 'nvr -l +__LINE__ __FILE__'
+  if v:progpath =~# 'build/bin/nvim$'
+    " for build/runtime/syntax/vim/generated.vim
+    let &runtimepath .= ','.$VIM.'/build/runtime'
+  endif
+else
+  filetype plugin indent on
+  syntax on packadd! matchit
+endif
+
+let g:vimsyn_embed   = 'l'
+let g:vimsyn_folding = 'f'
+let g:is_bash        = 1
+let g:lisp_rainbow   = 1
+
+let g:markdown_fenced_languages = [
+  \'css',
+  \'erb=eruby',
+  \'html',
+  \'javascript', 'js=javascript',
+  \'python',
+  \'ruby',
+  \'sass',
+  \'typescript', 'ts=typescript',
+  \'vim',
+  \'xml',
+  \]
+
+
+let g:loaded_2html_plugin     = 1
+let g:loaded_getscriptPlugin  = 1
+let g:loaded_gzip             = 1
+let g:loaded_logipat          = 1
+let g:loaded_rrhelper         = 1
+let g:loaded_spellfile_plugin = 1
+let g:loaded_tarPlugin        = 1
+let g:loaded_zipPlugin        = 1
+
+" Color {{{1
+
+" Enable 24-bit true colors if your terminal supports it.
+if (has("termguicolors"))
+  " https://github.com/vim/vim/issues/993#issuecomment-255651605
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+
+  set termguicolors
+endif
+
+" Specific colorscheme settings (must come before setting your colorscheme).
+if !exists('g:gruvbox_contrast_light')
+  let g:gruvbox_contrast_light='hard'
+endif
+
+" Set the color scheme.
+colorscheme one
+set background=dark
+
+" Specific colorscheme settings (must come after setting your colorscheme).
+if (g:colors_name == 'gruvbox')
+  if (&background == 'dark')
+    hi Visual cterm=NONE ctermfg=NONE ctermbg=237 guibg=#3a3a3a
+  else
+    hi Visual cterm=NONE ctermfg=NONE ctermbg=228 guibg=#f2e5bc
+    hi CursorLine cterm=NONE ctermfg=NONE ctermbg=228 guibg=#f2e5bc
+    hi ColorColumn cterm=NONE ctermfg=NONE ctermbg=228 guibg=#f2e5bc
+  endif
+endif
+
+" Spelling mistakes will be colored up red.
+hi SpellBad cterm=underline ctermfg=203 guifg=#ff5f5f
+hi SpellLocal cterm=underline ctermfg=203 guifg=#ff5f5f
+hi SpellRare cterm=underline ctermfg=203 guifg=#ff5f5f
+hi SpellCap cterm=underline ctermfg=203 guifg=#ff5f5f
+
+
+" Status line {{{1
+
+" Heavily inspired by: https://github.com/junegunn/dotfiles/blob/master/vimrc
+function! s:statusline_expr()
+  let mod = "%{&modified ? '[+] ' : !&modifiable ? '[x] ' : ''}"
+  let ro  = "%{&readonly ? '[RO] ' : ''}"
+  let ft  = "%{len(&filetype) ? '['.&filetype.'] ' : ''}"
+  let fug = "%{exists('g:loaded_fugitive') ? fugitive#statusline() : ''}"
+  let sep = ' %= '
+  let pos = ' %-12(%l : %c%V%) '
+  let pct = ' %P'
+
+  return '[%n] %f %<'.mod.ro.ft.fug.sep.pos.'%*'.pct
+endfunction
+
+let &statusline = s:statusline_expr()
+
+" Options {{{1
+"   Research any of these by running :help <setting>
+
+" Options: indent settings {{{2
+set autoindent
+set cinoptions=l1,p0,)50,*50,t0
+set expandtab
+set smarttab
+set tabstop=4
+set softtabstop=4
+set shiftwidth=4
+set shiftround
+
+" Options: backup/swap/info/undo settings {{{2
+set updatetime=50
+set nobackup
+set nowritebackup
+set undofile
+"set noswapfile
+if has('nvim')
+  set backupdir-=.
+  set shada='100
+else
+  set backupdir   =$DOTVIM/files/backup
+  set directory   =/tmp//
+  set undodir     =$DOTVIM/files/undo
+  set viewdir     =$DOTVIM/files/view
+  set viminfo='100,n$DOTVIM/files/info/viminfo
+endif
+
+" Options: better navigation {{{2
+set cursorline
+set foldmethod=marker
+set foldopen-=hor
+set foldopen+=jump
+set foldtext=rer#foldhead()
+set hlsearch
+set incsearch
+set mouse=a
+set scrolloff=8
+set sidescroll=6
+set ignorecase
+set smartcase
+set tagcase=match
+
+" Options: misc settings {{{2
+set autoread
+set backspace=indent,eol,start
+set clipboard=unnamedplus
+set complete-=i
+set complete+=kspell
+set completeopt=menuone,noselect
+set diffopt+=vertical,foldcolumn:0,indent-heuristic,algorithm:patience
+"set exrc
+set fileformats=unix,dos,mac
+set hidden
+set history=1000
+set lazyredraw
+set matchpairs+=<:>
+set maxmempattern=5000
+set more
+set mousemodel=popup
+set noautowrite
+set noautowriteall
+set noequalalways
+set noerrorbells
+set nofsync
+set nojoinspaces
+set number
+set wrapscan
+set nrformats=bin,hex
+set pastetoggle=<F2>
+set regexpengine=1
+set relativenumber
+set report=0
+set sessionoptions-=options
+set sessionoptions+=localoptions
+set showfulltag
+set showtabline=1
+set splitbelow
+set splitright
+set switchbuf=
+set synmaxcol=200
+set tags^=./.git/tags;
+set textwidth=0
+set timeout
+set timeoutlen=1000
+set titlestring=VIM:\ %f
+set ttimeout
+set ttimeoutlen=50
+set ttyfast
+if !has('nvim')
+  set ttymouse=sgr
+endif
+set virtualedit=onemore,block
+set whichwrap=b,s,<,>
+
+" Options: wild stuff {{{2
+set suffixes+=.a,.1,.class
+set wildignore+=
+  \*.o,*.so,*.zip,*.png,*_build,*.git/*,**/node_modules/*,
+  \*.pyc,**/venv/*,**/.venv/*
+set wildmenu
+set wildoptions=tagfile
+if has('nvim')
+  set wildoptions+=pum
+else
+  set wildmode=list:longest,full
+endif
+
+" Options: display settings {{{2
+set cmdheight=1
+set colorcolumn=81
+set display+=lastline
+set laststatus=2
+set nolist
+set modeline
+set modelines=1
+set nostartofline
+set numberwidth=1
+set ruler
+set shortmess=aoOTIc
+set showcmd
+set showmatch
+set showmode
+
+" Options: spelling
+set spellfile=~/.vim/spell/en.utf-8.add,~/.vim/spell/de.utf-8.add
+set spelllang=en,de
+
+" Options: breaking {{{2
+set wrap
+set nolinebreak
+set breakindent
+set breakindentopt=min:40
+"set highlight+=@:SpecialKey
+
+set cpoptions=aABcefFqsZ
+set formatoptions=tlcrqnj
+
+runtime! macros/matchit.vim
+
+"" Folding
+au FileType html let
+"" Mappings {{{1
+
+let mapleader = ';'
+"nnoremap \ ;
+
+map <Leader><Space> :let @/=''<CR>
+
+" Format paragraph (selected or not) to 80 character lines.
+nnoremap <Leader>g gqap
+xnoremap <Leader>g gqa
+
+" Prevent x from overriding what's in the clipboard.
+noremap x "_x
+noremap X "_x
+
+" Edit Vim config file in a new tab.
+map <Leader>Ve :tabnew $MYVIMRC<CR>
+
+" Source Vim config file.
+map <Leader>Vs :source $MYVIMRC<CR>
+
+" Toggle spell check.
+map <F5> :setlocal spell!<CR>
+
+" Automatically fix the last misspelled word and jump back to where you were.
+"   Taken from this talk: https://www.youtube.com/watch?v=lwD8G1P52Sk
+nnoremap <leader>sp :normal! mz[s1z=`z<CR>
+
+" Move 1 more lines up or down in normal and visual selection modes.
+nnoremap <C-k> :m .-2<CR>==
+nnoremap <C-j> :m .+1<CR>==
+vnoremap <C-k> :m '<-2<CR>gv=gv
+vnoremap <C-j> :m '>+1<CR>gv=gv
+
+" Search and replace word selected by '*' in normal mode
+nnoremap <Leader>r :%s///g<left><left>
+nnoremap <Leader>rc :%s///gc<left><left><left>
+
+" Search and replace word selected by '*' only in visual block
+" requires 'nelstrom/vim-visual-star-search'
+xnoremap <Leader>r :s///g<left><left>
+xnoremap <Leader>r :s///gc<left><left><left>
+
+" Type replacement term and press '.' to repeat replacement
+nnoremap <silent> s* :let @/='\<'.expand('<cword>').'\>'<CR>cgn
+xnoremap <silent> s* "sy:let @/=@s<CR>cgn
+
+" Toggle quickfix window.
+function! QuickFix_toggle()
+  for i in range(1, winnr('$'))
+    let bnum = winbufnr(i)
+    if getbufvar(bnum, '&buftype') == 'quickfix'
+      cclose
+      return
+    endif
+  endfor
+  copen
+endfunction
+nnoremap <silent> <Leader>c :call QuickFix_toggle()<CR>
+
+"" Navigate the complete menu items like CTRL+n / CTRL+p would.
+inoremap <expr> <Down> pumvisible() ? "<C-n>" :"<Down>"
+inoremap <expr> <Up> pumvisible() ? "<C-p>" : "<Up>"
+
+" Select the complete menu item like CTRL+y would.
+inoremap <expr> <Right> pumvisible() ? "<C-y>" : "<Right>"
+inoremap <expr> <CR> pumvisible() ? "<C-y>" :"<CR>"
+
+" Cancel the complete menu item like CTRL+e would.
+inoremap <expr> <Left> pumvisible() ? "<C-e>" : "<Left>"
+
+" Plugins {{{1
+" Plugin: fzf.vim {{{2
+
+let $FZF_DEFAULT_OPTS = '--bind ctrl-a:select-all'
+
+nnoremap <silent> <C-p>   :FZF -m<CR>
+nnoremap <leader><leader> :Buffers<CR>
+nnoremap <leader>C        :Colorschemes<CR>
+nnoremap <leader>P        :Plugins<CR>
+nnoremap <leader>S        :Snippets<CR>
+nnoremap <Leader>L        :Lines<CR>
+nnoremap <leader>F        :Rg<CR>
+
+" Map a few common things to do with FZF.
+"
+" Customize fzf colors to match your color scheme.
+let g:fzf_colors =
+  \ { 'fg':      ['fg', 'Normal'],
+  \ 'bg':      ['bg', 'Normal'],
+  \ 'hl':      ['fg', 'Comment'],
+  \ 'fg+':     ['fg', 'CursorLine', 'CursorColumn', 'Normal'],
+  \ 'bg+':     ['bg', 'CursorLine', 'CursorColumn'],
+  \ 'hl+':     ['fg', 'Statement'],
+  \ 'info':    ['fg', 'PreProc'],
+  \ 'prompt':  ['fg', 'Conditional'],
+  \ 'pointer': ['fg', 'Exception'],
+  \ 'marker':  ['fg', 'Keyword'],
+  \ 'spinner': ['fg', 'Label'],
+  \ 'header':  ['fg', 'Comment'] }
+
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-s': 'split',
+  \ 'ctrl-v': 'vsplit',
+  \ 'ctrl-y': {lines -> setreg('*', join(lines, "\n"))}}
+
+function! s:buflist()
+  return map(filter(range(1, bufnr('$')),
+    \ 'bufloaded(v:val)'), 'printf("%s: %s", v:val, bufname(v:val))')
+endfunction
+
+function! s:bufopen(lines)
+  if len(a:lines) < 2 | return | endif
+  let cmd = get({
+    \ 'ctrl-s': 'split',
+    \ 'ctrl-v': 'vsplit',
+    \ 'ctrl-t': 'tabedit'
+    \ }, a:lines[0], 'edit')
+  execute cmd '+b'.matchstr(a:lines[1], '^\d\+')
+endfunction
+
+function! s:plugopen(entry)
+  execute 'Fern' expand(s:bundle_dir) .'/'. a:entry
+endfunction
+
+command! Buffers let bl = reverse(s:buflist()) | call fzf#run(fzf#wrap({
+  \ 'source':  bl,
+  \ 'sink*':   function('<sid>bufopen'),
+  \ 'options': '+m --expect=ctrl-s,ctrl-v,ctrl-t',
+  \ 'down':    len(bl) + 2,
+  \ })) | unlet bl
+
+command! -bang -nargs=* Plugins call fzf#run(fzf#wrap({
+  \ 'source':  reverse(sort(map(globpath(s:bundle_dir, '*', 0, 1), 'fnamemodify(v:val, ":t")'))),
+  \ 'sink':    function('<sid>plugopen'),
+  \ 'options': '+m',
+  \ 'left':    30
+  \ }))
+
+command! -bang -nargs=* Colorschemes call fzf#run(fzf#wrap({
+  \ 'source':  reverse(sort(mwrapap(globpath(&rtp, 'colors/*.vim', 0, 1), 'fnamemodify(v:val, ":t:r")'))),
+  \ 'sink':    'colorscheme',
+  \ 'options': '+m',
+  \ 'left':    30
+  \ }))
+
+command! -bang -nargs=* Snippets call fzf#vim#snippets(fzf#wrap({
+  \ 'options': '+m',
+  \ 'right':    60
+  \ }))
+
+" Plugin: quick-scope {{{2
+let g:qs_highlight_on_keys=['f', 'F', 't', 'T']
+augroup qs_colors
+  autocmd!
+  autocmd ColorScheme * highlight QuickScopePrimary gui=underline cterm=underline
+  autocmd ColorScheme * highlight QuickScopeSecondary gui=underline cterm=underline
+augroup END
+
+" Plugin: vim-grepper {{{2
+
+let g:grepper={}
+let g:grepper.tools=["rg"]
+
+xmap gr <plug>(GrepperOperator)
+
+" After searching for text, press this mapping to do a project wide find and
+" replace. It's similar to <leader>r except this one applies to all matches
+" across all files instead of just the current file.
+nnoremap <Leader>R
+  \ :let @s='\<'.expand('<cword>').'\>'<CR>
+  \ :Grepper -cword -noprompt<CR>
+  \ :cfdo %s/<C-r>s//g \| update
+  \<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
+
+" The same as above except it works with a visual selection.
+xmap <Leader>R
+  \ "sy
+  \ gvgr
+  \ :cfdo %s/<C-r>s//g \| update
+  \<Left><Left><Left><Left><Left><Left><Left><Left><Left><Left><Left>
+
+" Plugin: vim-better-whitespace {{{2
+let g:better_whitespace_enabled=1
+let g:strip_whitespace_confirm=0
+let g:strip_whitelines_at_eof=1
+let g:strip_whitespace_on_save=1
+let g:strip_only_modified_lines=1
+" }}}2
+" Plugin: FastFold {{{2
+let g:fastfold_savehook=0
+let g:fastfold_fold_command_suffixes=[]
+" }}}2
+" Plugin: goyo.vim {{{2
+augroup Goyo
+  autocmd!
+  autocmd User GoyoEnter Limelight
+  autocmd User GoyoLeave Limelight!
+augroup END
+noremap <leader>G :Goyo<cr>
+
+" }}}2
+" Plugin: limelight.vim {{{2
+let g:limelight_conceal_ctermfg=244
+" }}}2
+" Plugin: markdown-preview.nvim {{{2
+let g:mkdp_auto_close=0
+let g:mkdp_refresh_slow=1
+"let g:mkdp_markdown_css=fnameescape($HOME).'/.local/lib/github-markdown-css/github-markdown.css'
+
+" Plugin: ultisnips {{{2
+
+let g:UltisnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<tab>"
+let g:UltiSnipsJumpBackwardTrigger="<s-tab>"
+
+function! g:UltiSnips_Complete()
+  call UltiSnips#ExpandSnippet()
+  if g:ulti_expand_res == 0
+    if pumvisible()
+      if empty(v:completed_item)
+        return "\<C-n>\<C-p>"
+      else
+        return "\<C-n>"
+      endif
+    else
+      call UltiSnips#JumpForwards()
+      if g:ulti_jump_forwards_res == 0
+        return "\<Tab>"
+      endif
+    endif
+  endif
+  return ""
+endfunction
+
+" Intercepts Autocmplpop mappings so Ultisnips and YMC can work with the above function.
+au BufEnter * exec "inoremap <silent> " . g:UltiSnipsExpandTrigger . " <C-R>=g:UltiSnips_Complete()<cr>"
+
+let g:acp_enableAtStartup = 1
+let g:acp_mappingDriven = 0
+let g:acp_ignorecaseOption = 1
+
+" use shift-tab to go through autocompletion without triggering ultisnips
+inoremap <s-tab> <c-p>
+
+" Plugin: vimtex {{{2
+if s:is_win || s:is_wsl
+  let g:vimtex_view_general_viewer = 'sumatra'
+endif
+let g:vimtex_view_general_options
+  \ = '-reuse-instance -forward-search @tex @line @pdf'
+"let g:vimtex_view_general_options_latexmk = '-reuse-instance'
+
+let g:vimtex_view_general_options
+  \ = '-reuse-instance -forward-search @tex @line @pdf'
+  \ . ' -inverse-search "' . exepath(v:progpath)
+  \ . ' --servername ' . v:servername
+  \ . ' --remote-send \"^<C-\^>^<C-n^>'
+  \ . ':execute ''drop '' . fnameescape(''\%f'')^<CR^>'
+  \ . ':\%l^<CR^>:normal\! zzzv^<CR^>'
+  \ . ':call remote_foreground('''.v:servername.''')^<CR^>^<CR^>\""'
+
+" TOC settings
+let g:vimtex_toc_config = {
+  \ 'name' : 'TOC',
+  \ 'layers' : ['content', 'todo', 'include'],
+  \ 'resize' : 1,
+  \ 'split_width' : 50,
+  \ 'todo_sorted' : 0,
+  \ 'show_help' : 1,
+  \ 'show_numbers' : 1,
+  \ 'mode' : 2,
+  \}
+
+" Plugin: vim-slime {{{2
+let g:slime_target = 'tmux'
+let g:slime_paste_file = '${HOME}/.slime_paste'
+let g:slime_python_ipython = 1
+
+let g:slime_cell_delimiter = '```'
+nmap <leader>ss <Plug>SlimeLineSend
+nmap <leader>sc <Plug>SlimeSendCell
+nmap <leader>sr <Plug>SlimeParagraphSend
+nmap <leader>sf <Plug>SlimeConfig
+
+" Plugin: vim-tmux-navigator {{{2
+let g:tmux_navigator_no_mappings = 1
+
+execute "set <M-k>=\033k"
+execute "set <M-h>=\033h"
+execute "set <M-j>=\033j"
+execute "set <M-l>=\033l"
+execute "set <M-;>=\033;"
+
+" Navigate around splits with a single key combo.
+nnoremap <silent> <M-k> :TmuxNavigateUp<CR>
+nnoremap <silent> <M-h> :TmuxNavigateLeft<CR>
+nnoremap <silent> <M-j> :TmuxNavigateDown<CR>
+nnoremap <silent> <M-l> :TmuxNavigateRight<CR>
+nnoremap <silent> <M-;> :TmuxNavigatePrevious<CR>
+
+" }}}2
+" Autocommands {{{1
+augroup general
+  autocmd!
+  " Resize vim windows automatically on terminal resize
+  autocmd VimResized * wincmd =
+  " Update a buffer's contents on focus if it changed outside of Vim.
+  autocmd FocusGained,BufEnter * :checktime
+  " Unset paste on InsertLeave.
+  autocmd InsertLeave * silent! set nopaste
+  " Make sure all types of requirements.txt files get syntax highlighting.
+  autocmd BufNewFile,BufRead requirements*.txt set ft=python
+  " Make sure .aliases, .bash_aliases and similar files get syntax highlighting.
+  autocmd BufNewFile,BufRead .*aliases* set ft=sh
+  " Ensure tabs don't get converted to spaces in Makefiles.
+  autocmd FileType make setlocal noexpandtab
+augroup END
+
+" Only show the cursor line in the active buffer.
+augroup CursorLine
+    au!
+    au VimEnter,WinEnter,BufWinEnter * setlocal cursorline
+    au WinLeave * setlocal nocursorline
+augroup END
+
+" WSL yank support
+if s:is_wsl
+  let s:clip = '/mnt/c/Windows/System32/clip.exe'
+  if executable(s:clip)
+    augroup WSLYank
+      autocmd!
+      autocmd TextYankPost * if v:event.operator ==# 'y' |
+        \ call system(s:clip, @0) | endif
+    augroup END
+  endif
+endif
+" }}}1
+
+if filereadable($DOTVIM.'/magic.vim')
+    source $DOTVIM/magic.vim
+endif
+
+" : ts=4 sts=4 tw=0 fdm=marker nowrap

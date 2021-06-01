@@ -1,0 +1,10 @@
+[user]
+	name = Roman Rüttimann
+	email = roman.ruettimann@gmail.com
+	signingkey = roman.ruettimann@gmail.com
+
+[commit]
+	gpgsign = true
+
+[tag]
+	gpgSign = true
